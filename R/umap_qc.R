@@ -1,12 +1,19 @@
 #' UMAP on samples using selected features
 #'
-#' @param X numeric matrix [features x samples].
+#' @param X numeric matrix with features in rows and samples in columns.
 #' @param feats character; feature names to use (non-matching are ignored with a message).
 #' @param n_neighbors integer; UMAP neighbor size (default 15).
 #' @param min_dist numeric; UMAP min_dist (default 0.1).
 #' @param metric character; distance metric (default "euclidean").
 #' @param seed integer; RNG seed for reproducibility (default 1).
-#' @return matrix [samples x 2] with rownames = sample IDs.
+#' @return matrix with samples in rows and two UMAP columns, with rownames =
+#'   sample IDs.
+#' @examples
+#' X <- matrix(seq_len(80) / 10, nrow = 10)
+#' rownames(X) <- paste0("feature", seq_len(nrow(X)))
+#' colnames(X) <- paste0("sample", seq_len(ncol(X)))
+#' emb <- run_umap_samples(X, rownames(X)[1:4], n_neighbors = 3)
+#' head(emb)
 #' @export
 run_umap_samples <- function(
     X, feats,
@@ -18,7 +25,7 @@ run_umap_samples <- function(
   feats <- intersect(feats, rownames(X))
   if (length(feats) == 0L) stop("None of the requested 'feats' are present in 'X'.")
   S <- scale(t(X[feats, , drop = FALSE]))  # samples x features
-  set.seed(seed)
+  .switch_set_seed(seed)
   emb <- uwot::umap(S,
                     n_neighbors = n_neighbors,
                     min_dist = min_dist,
@@ -38,6 +45,11 @@ run_umap_samples <- function(
 #' @param shape integer; point shape (default 21 = filled circle).
 #' @param color,stroke,alpha aesthetics for outlines and transparency.
 #' @param palette optional named vector of fill colors; if NULL, generated automatically.
+#' @return ggplot object.
+#' @examples
+#' emb <- matrix(c(0, 0, 1, 1, 0, 1), ncol = 2, byrow = TRUE)
+#' rownames(emb) <- paste0("sample", seq_len(nrow(emb)))
+#' plot_umap(emb, groups = c("A", "A", "B"))
 #' @export
 plot_umap <- function(
     emb, groups, title = "",
@@ -65,7 +77,7 @@ plot_umap <- function(
     } else {
       pal <- grDevices::hcl.colors(nlev, "Set2", rev = FALSE)
     }
-    palette <- setNames(pal[seq_len(nlev)], levs)
+    palette <- stats::setNames(pal[seq_len(nlev)], levs)
   }
 
   ggplot2::ggplot(df, ggplot2::aes(UMAP1, UMAP2, fill = Group)) +
@@ -79,16 +91,27 @@ plot_umap <- function(
 
 #' UMAP triptych using delta-ranked features
 #'
-#' Generates UMAPs for (1) attenuated (+delta), (2) escalated (-delta),
-#' and (3) all features. Returns the three embeddings and a combined plot.
+#' Generates UMAPs for (1) baseline-aligned (+delta), (2)
+#' perturbation-aligned (-delta), and (3) all features. Returns the three
+#' embeddings and a combined plot.
 #'
-#' @param X numeric matrix [features x samples].
+#' @param X numeric matrix with features in rows and samples in columns.
 #' @param delta named numeric vector of delta scores (names = feature IDs).
 #' @param groups factor or character of sample groups (length = ncol(X)).
 #' @param top_n integer; number of features to use per side (default 100).
 #' @param n_neighbors,min_dist,metric,seed passed to [run_umap_samples()].
 #' @param palette optional named color vector for groups; if NULL, generated automatically.
-#' @return list with `emb_attenuated`, `emb_escalated`, `emb_all`, and `plot`.
+#' @return list with `emb_baseline`, `emb_perturbation`, `emb_all`, and `plot`.
+#' @examples
+#' X <- matrix(seq_len(100) / 10, nrow = 10)
+#' rownames(X) <- paste0("feature", seq_len(nrow(X)))
+#' colnames(X) <- paste0("sample", seq_len(ncol(X)))
+#' delta <- stats::setNames(seq(-1, 1, length.out = nrow(X)), rownames(X))
+#' groups <- rep(c("A", "B"), each = 5)
+#' triptych <- umap_triptych_by_delta(
+#'   X, delta, groups, top_n = 2, n_neighbors = 3
+#' )
+#' names(triptych)
 #' @export
 umap_triptych_by_delta <- function(
     X, delta, groups,
@@ -109,16 +132,16 @@ umap_triptych_by_delta <- function(
   ord <- order(delta_use, decreasing = TRUE)
   top_n <- max(1L, min(top_n, length(delta_use)))
 
-  attenuated_feat <- names(delta_use)[ord][seq_len(top_n)]
-  escalated_feat  <- names(delta_use)[rev(ord)][seq_len(top_n)]
+  baseline_feat <- names(delta_use)[ord][seq_len(top_n)]
+  perturbation_feat <- names(delta_use)[rev(ord)][seq_len(top_n)]
 
-  emb_attenuated <- run_umap_samples(
-    X, feats = attenuated_feat,
+  emb_baseline <- run_umap_samples(
+    X, feats = baseline_feat,
     n_neighbors = n_neighbors, min_dist = min_dist,
     metric = metric, seed = seed
   )
-  emb_escalated <- run_umap_samples(
-    X, feats = escalated_feat,
+  emb_perturbation <- run_umap_samples(
+    X, feats = perturbation_feat,
     n_neighbors = n_neighbors, min_dist = min_dist,
     metric = metric, seed = seed
   )
@@ -139,12 +162,12 @@ umap_triptych_by_delta <- function(
     } else {
       pal <- grDevices::hcl.colors(nlev, "Set2", rev = FALSE)
     }
-    palette <- setNames(pal[seq_len(nlev)], levs)
+    palette <- stats::setNames(pal[seq_len(nlev)], levs)
   }
 
-  p1 <- plot_umap(emb_attenuated, groups, "Samples using attenuated features",
+  p1 <- plot_umap(emb_baseline, groups, "Samples using baseline-aligned features",
                   palette = palette)
-  p2 <- plot_umap(emb_escalated, groups, "Samples using escalated features",
+  p2 <- plot_umap(emb_perturbation, groups, "Samples using perturbation-aligned features",
                   palette = palette)
   p3 <- plot_umap(emb_all, groups, "Samples using all features",
                   palette = palette)
@@ -153,9 +176,9 @@ umap_triptych_by_delta <- function(
                            common.legend = TRUE, legend = "right")
 
   list(
-    emb_attenuated = emb_attenuated,
-    emb_escalated  = emb_escalated,
-    emb_all        = emb_all,
-    plot           = plt
+    emb_baseline = emb_baseline,
+    emb_perturbation = emb_perturbation,
+    emb_all = emb_all,
+    plot = plt
   )
 }

@@ -20,13 +20,13 @@ plot_delta_vs_fc(
 )
 }
 \arguments{
-\item{delta}{named numeric vector of δ (features).}
+\item{delta}{named numeric vector of directional importance scores (features).}
 
 \item{fc}{named numeric vector of log2 fold-change (same names as \code{delta}).}
 
-\item{delta_thresh}{numeric; |δ| threshold to define Q1–Q4 (default 0.15).}
+\item{delta_thresh}{numeric; absolute delta threshold to define Q1-Q4 (default 0.15).}
 
-\item{label_top}{integer; number of labels per quadrant (by |δ|). Set 0 to skip.}
+\item{label_top}{integer; number of labels per quadrant (by absolute delta). Set 0 to skip.}
 
 \item{label_size}{numeric; text size for labels.}
 
@@ -34,13 +34,22 @@ plot_delta_vs_fc(
 
 \item{point_size}{numeric; scatter point size.}
 
-\item{alpha}{numeric in \link{0,1}; point transparency.}
+\item{alpha}{numeric from 0 to 1; point transparency.}
 
-\item{xlab, ylab, }{title axis labels and plot title.}
+\item{xlab, ylab}{axis labels.}
+
+\item{title}{plot title.}
 }
 \value{
 list with elements: \code{data} (data.frame) and \code{plot} (ggplot object).
 }
 \description{
 Builds a tidy data.frame with quadrants and returns the ggplot scatter.
+}
+\examples{
+delta <- c(a = 0.2, b = -0.2, c = -0.2, d = 0.2, e = 0)
+fc <- c(a = 1, b = 1, c = -1, d = -1, e = 1)
+out <- plot_delta_vs_fc(delta, fc, label_top = 0)
+head(out$data)
+out$plot
 }

@@ -1,6 +1,6 @@
 #' Boxplots for selected features across groups
 #'
-#' @param X numeric matrix [features x samples].
+#' @param X numeric matrix with features in rows and samples in columns.
 #' @param group factor/character of length ncol(X) giving sample groups.
 #' @param features character vector of feature (gene/protein) names to plot.
 #' @param feature_order optional character vector to set facet order (defaults to `features` order).
@@ -16,6 +16,11 @@
 #' @param save_path optional file path to save (pdf/png) using `ggplot2::ggsave`.
 #' @param width,height numeric dimensions (inches) if saving.
 #' @return ggplot object.
+#' @examples
+#' X <- matrix(seq_len(40) / 10, nrow = 5)
+#' rownames(X) <- paste0("feature", seq_len(nrow(X)))
+#' group <- rep(c("A", "B"), each = 4)
+#' plot_feature_boxplots(X, group, features = rownames(X)[1:2], ncol = 2)
 #' @export
 plot_feature_boxplots <- function(
     X, group, features,
@@ -67,7 +72,7 @@ plot_feature_boxplots <- function(
     } else {
       pal <- grDevices::hcl.colors(nlev, "Set2", rev = FALSE)
     }
-    palette <- setNames(pal[seq_len(nlev)], levs)
+    palette <- stats::setNames(pal[seq_len(nlev)], levs)
   }
 
   p <- ggplot2::ggplot(df, ggplot2::aes(x = Group, y = Expression, fill = Group)) +

@@ -1,5 +1,7 @@
 ^SwitchClass\.Rproj$
 ^\.Rproj\.user$
+^\.DS_Store$
+^.*\.DS_Store$
 ^LICENSE\.md$
 ^README\.Rmd$
 ^_pkgdown\.yml$

@@ -31,6 +31,14 @@ plot_umap(
 
 \item{palette}{optional named vector of fill colors; if NULL, generated automatically.}
 }
+\value{
+ggplot object.
+}
 \description{
 Quick ggplot for UMAP embedding
+}
+\examples{
+emb <- matrix(c(0, 0, 1, 1, 0, 1), ncol = 2, byrow = TRUE)
+rownames(emb) <- paste0("sample", seq_len(nrow(emb)))
+plot_umap(emb, groups = c("A", "A", "B"))
 }

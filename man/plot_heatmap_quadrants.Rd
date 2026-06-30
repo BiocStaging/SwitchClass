@@ -20,7 +20,7 @@ plot_heatmap_quadrants(
 )
 }
 \arguments{
-\item{X}{numeric matrix \link{features x samples}; expression matrix.}
+\item{X}{numeric matrix with features in rows and samples in columns.}
 
 \item{group}{factor/character of length = ncol(X); sample group labels.}
 
@@ -35,29 +35,33 @@ Quadrants Q1 and Q4 use \code{delta > cutoff}; Q2 and Q3 use \code{delta < -cuto
 
 \item{scale}{logical; z-score features (default TRUE).}
 
-\item{cap}{numeric; cap scaled values at ±cap (default 2).}
+\item{cap}{numeric; cap scaled values at +/- cap (default 2).}
 
 \item{show_rownames, show_colnames}{logical; show labels (default TRUE).}
 
 \item{cluster_rows, cluster_cols}{logical; cluster rows/columns (default FALSE).}
-
-\item{width, height}{numeric; optional dimensions for PDF export.}
 }
 \value{
 Invisibly returns the \code{pheatmap} object.
 }
 \description{
 Generates a standardized heatmap of feature expression grouped by quadrant
-(Q1–Q4) and sample group (e.g., HC / Pre / Post). Quadrants are optionally
+(Q1-Q4) and sample group (e.g., HC / Pre / Post). Quadrants are optionally
 filtered by delta cutoff thresholds.
 }
 \examples{
-\dontrun{
-plot_heatmap_quadrants_auto(
-  X = crc.imputed,
-  group = group,
-  df_quad = df,
-  cutoff = 0.15
+plot_heatmap_quadrants(
+  X = matrix(
+    seq_len(24), nrow = 4,
+    dimnames = list(paste0("feature", 1:4), paste0("sample", 1:6))
+  ),
+  group = rep(c("A", "B"), each = 3),
+  df_quad = data.frame(
+    feature = paste0("feature", 1:4),
+    quadrant = c("Q1", "Q2", "Q3", "Q4"),
+    delta = c(0.2, -0.2, -0.2, 0.2)
+  ),
+  show_rownames = FALSE,
+  show_colnames = FALSE
 )
-}
 }

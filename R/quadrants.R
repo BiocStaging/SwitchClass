@@ -10,6 +10,10 @@
 #' @param fc    named numeric vector (same feature names as `delta`).
 #' @param delta_thresh numeric threshold for |delta|.
 #' @return factor vector of quadrant labels with names = features.
+#' @examples
+#' delta <- c(a = 0.2, b = -0.2, c = -0.2, d = 0.2, e = 0)
+#' fc <- c(a = 1, b = 1, c = -1, d = -1, e = 1)
+#' assign_quadrants(delta, fc, delta_thresh = 0.15)
 #' @export
 assign_quadrants <- function(delta, fc, delta_thresh = 0.15) {
   common <- intersect(names(delta), names(fc))
@@ -28,16 +32,23 @@ assign_quadrants <- function(delta, fc, delta_thresh = 0.15) {
 #'
 #' Builds a tidy data.frame with quadrants and returns the ggplot scatter.
 #'
-#' @param delta named numeric vector of δ (features).
+#' @param delta named numeric vector of directional importance scores (features).
 #' @param fc    named numeric vector of log2 fold-change (same names as `delta`).
-#' @param delta_thresh numeric; |δ| threshold to define Q1–Q4 (default 0.15).
-#' @param label_top integer; number of labels per quadrant (by |δ|). Set 0 to skip.
+#' @param delta_thresh numeric; absolute delta threshold to define Q1-Q4 (default 0.15).
+#' @param label_top integer; number of labels per quadrant (by absolute delta). Set 0 to skip.
 #' @param label_size numeric; text size for labels.
 #' @param palette named colors for quadrants. Names should include Q1..Q4 and optional Q0.
 #' @param point_size numeric; scatter point size.
-#' @param alpha numeric in [0,1]; point transparency.
-#' @param xlab,ylab, title axis labels and plot title.
+#' @param alpha numeric from 0 to 1; point transparency.
+#' @param xlab,ylab axis labels.
+#' @param title plot title.
 #' @return list with elements: `data` (data.frame) and `plot` (ggplot object).
+#' @examples
+#' delta <- c(a = 0.2, b = -0.2, c = -0.2, d = 0.2, e = 0)
+#' fc <- c(a = 1, b = 1, c = -1, d = -1, e = 1)
+#' out <- plot_delta_vs_fc(delta, fc, label_top = 0)
+#' head(out$data)
+#' out$plot
 #' @export
 plot_delta_vs_fc <- function(
     delta, fc,
@@ -62,7 +73,7 @@ plot_delta_vs_fc <- function(
     stringsAsFactors = FALSE
   )
 
-  # choose labels: top |δ| per quadrant (skip Q0)
+  # choose labels: top absolute delta per quadrant (skip Q0)
   label_df <- NULL
   if (label_top > 0) {
     label_df <- do.call(rbind, lapply(c("Q1","Q2","Q3","Q4"), function(q) {
@@ -77,7 +88,10 @@ plot_delta_vs_fc <- function(
   pal_use <- palette
   missing_cols <- setdiff(present_quads, names(pal_use))
   if (length(missing_cols)) {
-    pal_use <- c(pal_use, setNames(rep("grey60", length(missing_cols)), missing_cols))
+    pal_use <- c(
+      pal_use,
+      stats::setNames(rep("grey60", length(missing_cols)), missing_cols)
+    )
   }
 
   # plot

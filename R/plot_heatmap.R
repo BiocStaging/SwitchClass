@@ -1,10 +1,10 @@
 #' Plot heatmap for quadrant-classified features
 #'
 #' Generates a standardized heatmap of feature expression grouped by quadrant
-#' (Q1–Q4) and sample group (e.g., HC / Pre / Post). Quadrants are optionally
+#' (Q1-Q4) and sample group (e.g., HC / Pre / Post). Quadrants are optionally
 #' filtered by delta cutoff thresholds.
 #'
-#' @param X numeric matrix [features x samples]; expression matrix.
+#' @param X numeric matrix with features in rows and samples in columns.
 #' @param group factor/character of length = ncol(X); sample group labels.
 #' @param df_quad data.frame with columns: \code{feature}, \code{quadrant}, and \code{delta}.
 #' @param cutoff numeric; delta threshold for selecting strong quadrant features (default 0.15).
@@ -12,20 +12,25 @@
 #' @param palette_group optional named color vector for sample groups.
 #' @param palette_quad optional named color vector for quadrants.
 #' @param scale logical; z-score features (default TRUE).
-#' @param cap numeric; cap scaled values at ±cap (default 2).
+#' @param cap numeric; cap scaled values at +/- cap (default 2).
 #' @param show_rownames,show_colnames logical; show labels (default TRUE).
 #' @param cluster_rows,cluster_cols logical; cluster rows/columns (default FALSE).
-#' @param width,height numeric; optional dimensions for PDF export.
 #' @return Invisibly returns the \code{pheatmap} object.
 #' @examples
-#' \dontrun{
-#' plot_heatmap_quadrants_auto(
-#'   X = crc.imputed,
-#'   group = group,
-#'   df_quad = df,
-#'   cutoff = 0.15
+#' plot_heatmap_quadrants(
+#'   X = matrix(
+#'     seq_len(24), nrow = 4,
+#'     dimnames = list(paste0("feature", 1:4), paste0("sample", 1:6))
+#'   ),
+#'   group = rep(c("A", "B"), each = 3),
+#'   df_quad = data.frame(
+#'     feature = paste0("feature", 1:4),
+#'     quadrant = c("Q1", "Q2", "Q3", "Q4"),
+#'     delta = c(0.2, -0.2, -0.2, 0.2)
+#'   ),
+#'   show_rownames = FALSE,
+#'   show_colnames = FALSE
 #' )
-#' }
 #' @export
 plot_heatmap_quadrants <- function(
     X, group, df_quad,
@@ -53,6 +58,9 @@ plot_heatmap_quadrants <- function(
   genes_ordered <- intersect(genes_ordered, rownames(X))
   if (length(genes_ordered) == 0)
     stop("No quadrant features found above cutoff.")
+  quad_lookup <- rep(names(quad_genes), lengths(quad_genes))
+  names(quad_lookup) <- unlist(quad_genes)
+  quad_vec <- unname(quad_lookup[genes_ordered])
   mat <- X[genes_ordered, , drop = FALSE]
 
   # --- Z-score and cap values ---
@@ -69,19 +77,18 @@ plot_heatmap_quadrants <- function(
   # --- Annotations ---
   annotation_row <- data.frame(Group = group_ord)
   rownames(annotation_row) <- colnames(mat)
-  quad_vec <- rep(names(quad_genes), lengths(quad_genes))
   annotation_col <- data.frame(Quadrant = factor(quad_vec, levels = names(quad_genes)))
   rownames(annotation_col) <- rownames(mat)
 
   # --- Colors ---
   if (is.null(palette_group)) {
     if (requireNamespace("RColorBrewer", quietly = TRUE)) {
-      palette_group <- setNames(
+      palette_group <- stats::setNames(
         RColorBrewer::brewer.pal(min(8, nlevels(group)), "Set2"),
         levels(group)
       )
     } else {
-      palette_group <- setNames(grDevices::hcl.colors(nlevels(group)), levels(group))
+      palette_group <- stats::setNames(grDevices::hcl.colors(nlevels(group)), levels(group))
     }
   }
   if (is.null(palette_quad)) {
@@ -90,7 +97,10 @@ plot_heatmap_quadrants <- function(
 
   # --- Row/column gaps ---
   row_gaps <- cumsum(table(group_ord))
-  col_gaps <- cumsum(lengths(quad_genes))[1:(length(quad_genes)-1)]
+  row_gaps <- row_gaps[row_gaps < ncol(mat)]
+  quad_counts <- table(factor(quad_vec, levels = names(quad_genes)))
+  col_gaps <- cumsum(as.integer(quad_counts))
+  col_gaps <- col_gaps[col_gaps < nrow(mat)]
 
   # --- Plot ---
   p <- pheatmap::pheatmap(
