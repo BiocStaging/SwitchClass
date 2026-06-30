@@ -2,7 +2,7 @@
 % Please edit documentation in R/enrichment.R
 \name{enrich_reactome_quadrants}
 \alias{enrich_reactome_quadrants}
-\title{Reactome ORA per quadrant (using pathwayOverrepresent)}
+\title{Reactome ORA per quadrant}
 \usage{
 enrich_reactome_quadrants(
   df,
@@ -13,7 +13,9 @@ enrich_reactome_quadrants(
 )
 }
 \arguments{
-\item{df}{data.frame with columns: gene, delta, quadrant (Q1..Q4)}
+\item{df}{data.frame with columns \code{feature} and \code{quadrant} (Q1..Q4).
+If \code{quadrant} is absent, columns \code{delta} and \code{fc} are used to assign it
+by sign.}
 
 \item{universe}{character vector of background gene symbols (e.g., rownames(discovery.cohort))}
 
@@ -36,6 +38,6 @@ Wraps a convenience pipeline:
 \itemize{
 \item builds Reactome TERM2GENE via msigdbr
 \item runs pathwayOverrepresent on each quadrant (Q1..Q4)
-\item returns top-k barplots (−log10 p) and tidy tables
+\item returns top-k barplots (-log10 p) and tidy tables
 }
 }

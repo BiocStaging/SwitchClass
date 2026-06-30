@@ -23,3 +23,8 @@ Q3:  delta < -T & FC <  0
 Q4:  delta >  T & FC <  0
 Q0:  otherwise
 }
+\examples{
+delta <- c(a = 0.2, b = -0.2, c = -0.2, d = 0.2, e = 0)
+fc <- c(a = 1, b = 1, c = -1, d = -1, e = 1)
+assign_quadrants(delta, fc, delta_thresh = 0.15)
+}

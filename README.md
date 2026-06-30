@@ -1,10 +1,10 @@
 
 # SwitchClass
 
-`SwitchClass` is an R package for quantifying and visualising *molecular reversibility and persistence* across biological perturbations using a label-switch classification framework.  
+`SwitchClass` is an R package for quantifying baseline-aligned and perturbation-aligned molecular features across biological perturbations using a label-switch classification framework.
 It provides a unified workflow for identifying *baseline-aligned* versus *perturbation-aligned* molecular features in longitudinal or comparative omics datasets.
 
-The package was developed as part of the study **Dissecting Reversal and Persistence of Molecular Features via a Label-Switch Classification Framework**, which systematically maps molecular trajectories that normalise or remain dysregulated under different biological or therapeutic conditions.
+The package was developed as part of the study **Dissecting Molecular Feature Alignment via a Label-Switch Classification Framework**, which systematically maps molecular trajectories across biological or therapeutic conditions.
 
 ---
 
@@ -15,7 +15,7 @@ The package was developed as part of the study **Dissecting Reversal and Persist
 `SwitchClass` implements the following core components:
 
 1. **Label-switch classification**  
-   A random-forest–based approach that compares importance profiles between two inverted label schemes to compute a per-feature *delta score* (\(\delta = I_{rev} - I_{per}\)) indicating reversal versus persistence.
+   A random-forest-based approach that compares importance profiles between two label schemes to compute a per-feature *directional importance score* (`delta = importance_baseline - importance_perturbation`).
 
 2. **Visualization utilities**  
    Functions for visualizing molecular states via UMAP embeddings, quadrant-based scatterplots, feature-level boxplots, and annotated heatmaps.
@@ -24,7 +24,7 @@ The package was developed as part of the study **Dissecting Reversal and Persist
    Tools for pathway enrichment (Reactome) and quadrant-based biological annotation.
 
 4. **Example datasets and vignettes**  
-   Includes demonstration data from colorectal cancer (CRC), phosphoproteomic, and immune-transcriptomic studies.
+   Includes demonstration data from colorectal cancer (CRC).
 
 ---
 
@@ -37,7 +37,6 @@ Install the development version from GitHub:
 # BiocManager::install("PhosR")
 # BiocManager::install("reactome.db")
 # BiocManager::install("org.Hs.eg.db")
-# BiocManager::install("annotate")
 
 devtools::install_github("PYangLab/SwitchClass",
                          build_vignettes = TRUE,
@@ -54,5 +53,4 @@ browseVignettes("SwitchClass")
 
 ## Contact us
 
-If you have any enquiries about SwitchClass, please contact di.xiao@sydney.edu.au. We are also happy to receive any suggestions and comments.
-
+If you have any enquiries about SwitchClass, please contact d.xiao@sydney.edu.au. We are also happy to receive any suggestions and comments.

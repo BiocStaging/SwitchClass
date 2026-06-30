@@ -1,11 +1,13 @@
-#' Reactome ORA per quadrant (using pathwayOverrepresent)
+#' Reactome ORA per quadrant
 #'
 #' Wraps a convenience pipeline:
 #' - builds Reactome TERM2GENE via msigdbr
 #' - runs pathwayOverrepresent on each quadrant (Q1..Q4)
-#' - returns top-k barplots (−log10 p) and tidy tables
+#' - returns top-k barplots (-log10 p) and tidy tables
 #'
-#' @param df data.frame with columns: gene, delta, quadrant (Q1..Q4)
+#' @param df data.frame with columns `feature` and `quadrant` (Q1..Q4).
+#'   If `quadrant` is absent, columns `delta` and `fc` are used to assign it
+#'   by sign.
 #' @param universe character vector of background gene symbols (e.g., rownames(discovery.cohort))
 #' @param species msigdbr species (default "Homo sapiens")
 #' @param top_terms how many top terms per quadrant to plot (default 5)
@@ -24,12 +26,18 @@ enrich_reactome_quadrants <- function(
     palette = c(Q1 = "#33DBB2", Q2 = "#DFB647", Q3 = "#2ECEF8", Q4 = "#76CF49")
 ) {
 
-  df$quadrant <- ifelse(df$delta >  0 & df$fc >  0, "Q1",
-                        ifelse(df$delta < 0 & df$fc >  0, "Q2",
-                               ifelse(df$delta < 0 & df$fc <  0, "Q3",
-                                      ifelse(df$delta >  0 & df$fc <  0, "Q4", "Q0"))))
-
-  stopifnot(all(c("feature","quadrant") %in% names(df)))
+  if (!"feature" %in% names(df)) {
+    stop("'df' must contain a 'feature' column.")
+  }
+  if (!"quadrant" %in% names(df)) {
+    if (!all(c("delta", "fc") %in% names(df))) {
+      stop("'df' must contain 'quadrant' or both 'delta' and 'fc'.")
+    }
+    df$quadrant <- ifelse(df$delta >  0 & df$fc >  0, "Q1",
+                          ifelse(df$delta < 0 & df$fc >  0, "Q2",
+                                 ifelse(df$delta < 0 & df$fc <  0, "Q3",
+                                        ifelse(df$delta >  0 & df$fc <  0, "Q4", "Q0"))))
+  }
   if (!requireNamespace("msigdbr", quietly = TRUE))
     stop("Package 'msigdbr' is required.")
   if (!requireNamespace("dplyr", quietly = TRUE))
@@ -40,15 +48,18 @@ enrich_reactome_quadrants <- function(
     stop("Package 'ggpubr' is required.")
 
   # Build Reactome TERM2GENE via msigdbr
-  msig_react <- msigdbr::msigdbr(species = species, category = "C2", subcategory = "CP:REACTOME") |>
-    dplyr::select(gs_name, gene_symbol)
+  msig_react <- msigdbr::msigdbr(
+    species = species, category = "C2", subcategory = "CP:REACTOME"
+  )
+  msig_react <- msig_react[, c("gs_name", "gene_symbol"), drop = FALSE]
   rect <- split(msig_react$gene_symbol, msig_react$gs_name)
 
   # Helper to run ORA via pathwayOverrepresent safely
   run_overrep <- function(genes, annotation, universe) {
     genes <- intersect(genes, unique(unlist(annotation)))
     if (length(genes) == 0) return(NULL)
-    pathwayOverrepresent(genes, annotation = annotation, universe = universe, alter = "greater")
+    PhosR::pathwayOverrepresent(genes, annotation = annotation,
+                                universe = universe, alter = "greater")
   }
 
   # Per quadrant gene sets (names are symbols already)
@@ -62,6 +73,9 @@ enrich_reactome_quadrants <- function(
 
   # Build the plotting df (handle missing/short results)
   top_pick <- function(p_tab, k) {
+    if (is.null(p_tab) || nrow(p_tab) == 0L) {
+      return(NULL)
+    }
     k <- min(k, nrow(p_tab))
     out <- as.data.frame(p_tab)
     out$Term <- rownames(out)
@@ -92,10 +106,11 @@ enrich_reactome_quadrants <- function(
     as_bar_df(p2, "Q2"),
     as_bar_df(p3, "Q3"),
     as_bar_df(p4, "Q4")
-  ) %>%
-    dplyr::mutate(
-      Term = gsub("^REACTOME[_:]*", " ", Term)
-    )
+  )
+  barplot_df <- dplyr::mutate(
+    barplot_df,
+    Term = gsub("^REACTOME[_:]*", " ", Term)
+  )
 
   # Make 4 bar plots (empty panels if no terms)
   make_one <- function(df_sub, qlab) {

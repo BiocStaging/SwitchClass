@@ -14,7 +14,7 @@ run_umap_samples(
 )
 }
 \arguments{
-\item{X}{numeric matrix \link{features x samples}.}
+\item{X}{numeric matrix with features in rows and samples in columns.}
 
 \item{feats}{character; feature names to use (non-matching are ignored with a message).}
 
@@ -27,8 +27,16 @@ run_umap_samples(
 \item{seed}{integer; RNG seed for reproducibility (default 1).}
 }
 \value{
-matrix \link{samples x 2} with rownames = sample IDs.
+matrix with samples in rows and two UMAP columns, with rownames =
+sample IDs.
 }
 \description{
 UMAP on samples using selected features
+}
+\examples{
+X <- matrix(seq_len(80) / 10, nrow = 10)
+rownames(X) <- paste0("feature", seq_len(nrow(X)))
+colnames(X) <- paste0("sample", seq_len(ncol(X)))
+emb <- run_umap_samples(X, rownames(X)[1:4], n_neighbors = 3)
+head(emb)
 }

@@ -26,7 +26,7 @@ plot_feature_boxplots(
 )
 }
 \arguments{
-\item{X}{numeric matrix \link{features x samples}.}
+\item{X}{numeric matrix with features in rows and samples in columns.}
 
 \item{group}{factor/character of length ncol(X) giving sample groups.}
 
@@ -61,4 +61,10 @@ ggplot object.
 }
 \description{
 Boxplots for selected features across groups
+}
+\examples{
+X <- matrix(seq_len(40) / 10, nrow = 5)
+rownames(X) <- paste0("feature", seq_len(nrow(X)))
+group <- rep(c("A", "B"), each = 4)
+plot_feature_boxplots(X, group, features = rownames(X)[1:2], ncol = 2)
 }

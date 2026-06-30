@@ -4,14 +4,28 @@
 \alias{label_switch_classify}
 \title{Label-switch classification (with optional multicore)}
 \usage{
-label_switch_classify(X, y_reverse, y_persist)
+label_switch_classify(
+  X,
+  y_reverse,
+  y_persist,
+  ntimes = 25,
+  seed = 1,
+  ntree = 1000,
+  mtry = NULL,
+  parallel = FALSE,
+  ncores = parallel::detectCores() - 1L
+)
 }
 \arguments{
-\item{X}{numeric matrix \link{features x samples} with rownames.}
+\item{X}{numeric matrix with features in rows and samples in columns.}
 
-\item{y_reverse}{character/factor labels (length = ncol(X)) for the reversal scheme.}
+\item{y_reverse}{character/factor labels (length = ncol(X)) for the
+baseline-aligned label scheme. The argument name is retained for
+compatibility with earlier package versions.}
 
-\item{y_persist}{character/factor labels (length = ncol(X)) for the persistence scheme.}
+\item{y_persist}{character/factor labels (length = ncol(X)) for the
+perturbation-aligned label scheme. The argument name is retained for
+compatibility with earlier package versions.}
 
 \item{ntimes}{integer; number of RF repeats to average (default 25).}
 
@@ -21,14 +35,27 @@ label_switch_classify(X, y_reverse, y_persist)
 
 \item{mtry}{integer or NULL; variables tried at each split (default NULL).}
 
-\item{parallel}{logical; use multicore (default TRUE).}
+\item{parallel}{logical; use multicore (default FALSE).}
 
 \item{ncores}{integer; cores if \code{parallel=TRUE} (default detectCores()-1).}
 }
 \value{
-list with named numeric vectors: \code{delta}, \code{I_rev}, \code{I_per}.
+list with named numeric vectors: \code{delta}, \code{importance_baseline},
+\code{importance_perturbation}, plus compatibility aliases \code{I_rev} and \code{I_per}.
 }
 \description{
-Trains two random-forest classifiers with inverted labels and returns
-\eqn{\delta = I_{rev} - I_{per}} using MeanDecreaseGini importances.
+Trains two random-forest classifiers under baseline-aligned and
+perturbation-aligned label schemes, then returns the directional importance
+score \eqn{\delta = I_{baseline} - I_{perturbation}} using
+MeanDecreaseGini importances.
+}
+\examples{
+X <- matrix(seq_len(60) / 10, nrow = 10)
+rownames(X) <- paste0("feature", seq_len(nrow(X)))
+y_baseline <- rep(c("c1", "c2", "c1"), each = 2)
+y_perturbation <- rep(c("c1", "c2", "c2"), each = 2)
+res <- label_switch_classify(
+  X, y_baseline, y_perturbation, ntimes = 1, ntree = 5
+)
+head(res$delta)
 }

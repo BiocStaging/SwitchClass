@@ -17,7 +17,7 @@ umap_triptych_by_delta(
 )
 }
 \arguments{
-\item{X}{numeric matrix \link{features x samples}.}
+\item{X}{numeric matrix with features in rows and samples in columns.}
 
 \item{delta}{named numeric vector of delta scores (names = feature IDs).}
 
@@ -30,9 +30,21 @@ umap_triptych_by_delta(
 \item{palette}{optional named color vector for groups; if NULL, generated automatically.}
 }
 \value{
-list with \code{emb_attenuated}, \code{emb_escalated}, \code{emb_all}, and \code{plot}.
+list with \code{emb_baseline}, \code{emb_perturbation}, \code{emb_all}, and \code{plot}.
 }
 \description{
-Generates UMAPs for (1) attenuated (+delta), (2) escalated (-delta),
-and (3) all features. Returns the three embeddings and a combined plot.
+Generates UMAPs for (1) baseline-aligned (+delta), (2)
+perturbation-aligned (-delta), and (3) all features. Returns the three
+embeddings and a combined plot.
+}
+\examples{
+X <- matrix(seq_len(100) / 10, nrow = 10)
+rownames(X) <- paste0("feature", seq_len(nrow(X)))
+colnames(X) <- paste0("sample", seq_len(ncol(X)))
+delta <- stats::setNames(seq(-1, 1, length.out = nrow(X)), rownames(X))
+groups <- rep(c("A", "B"), each = 5)
+triptych <- umap_triptych_by_delta(
+  X, delta, groups, top_n = 2, n_neighbors = 3
+)
+names(triptych)
 }

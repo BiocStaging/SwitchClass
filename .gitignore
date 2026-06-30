@@ -2,6 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+.DS_Store
+*.tar.gz
+*.Rcheck/
+*.BiocCheck/
 .SwitchClass.Rproj
 /Meta/
 /doc/

@@ -1,34 +1,55 @@
 Package: SwitchClass
-Title: Label-switch classification to map attenuated vs escalated features
-Version: 0.1.0
-Description: Tools for reversal/persistence (label-switch) classification,
-    visualization, and pathway enrichment.
-Authors@R: c(person("Di", "Xiao", role = c("aut","cre"), email = "you@example.com"))
+Title: Label-Switch Classification for Baseline- and Perturbation-Aligned Features
+Version: 0.99.0
+Description: Tools for label-switch classification, visualization, and
+    pathway enrichment of baseline-aligned and perturbation-aligned molecular
+    features across biological conditions.
+Authors@R: c(
+    person("Di", "Xiao", role = c("aut", "cre"),
+        email = "d.xiao@sydney.edu.au"),
+    person("Pengyi", "Yang", role = "aut",
+        email = "pyang@cmri.org.au")
+    )
 License: MIT + file LICENSE
+URL: https://github.com/PYangLab/SwitchClass
+BugReports: https://github.com/PYangLab/SwitchClass/issues
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
+biocViews:
+    Software,
+    Classification,
+    FeatureExtraction,
+    GeneExpression,
+    Proteomics,
+    Transcriptomics,
+    SingleCell,
+    Pathways
 Depends:
-    R (>= 4.2)
+    R (>= 4.5.0)
 Imports:
     randomForest,
-    limma,
     uwot,
     ggplot2,
     ggrepel,
     PhosR,
     pheatmap,
-    glmnet,
     dplyr,
-    clusterProfiler,
-    reactome.db,
-    org.Hs.eg.db,
     RColorBrewer,
+    ggpubr,
     parallel
 Suggests:
+    BiocStyle,
     knitr,
     rmarkdown,
+    limma,
+    matrixStats,
     patchwork,
-    msigdbr
+    clusterProfiler,
+    glmnet,
+    reactome.db,
+    org.Hs.eg.db,
+    msigdbr,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
