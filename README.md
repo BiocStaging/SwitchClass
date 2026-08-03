@@ -1,6 +1,6 @@
 
 # SwitchClass
-<img src="inst/SwitchClass_logo.png" align="right" width="110" height="110" />
+<img src="inst/SwitchClass_logo.png" align="right" width="110" height="150" />
 
 `SwitchClass` is an R package for quantifying baseline-aligned and perturbation-aligned molecular features across biological perturbations using a label-switch classification framework.
 It provides a unified workflow for identifying *baseline-aligned* versus *perturbation-aligned* molecular features in longitudinal or comparative omics datasets.
