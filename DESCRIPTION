@@ -1,9 +1,12 @@
 Package: SwitchClass
 Title: Label-Switch Classification for Baseline- and Perturbation-Aligned Features
-Version: 0.99.0
-Description: Tools for label-switch classification, visualization, and
-    pathway enrichment of baseline-aligned and perturbation-aligned molecular
-    features across biological conditions.
+Version: 0.99.1
+Description: Quantifies baseline-aligned and perturbation-aligned molecular
+    features across biological perturbations using a label-switch
+    classification framework. Provides a unified workflow for identifying
+    changes in molecular-feature alignment in longitudinal or comparative
+    omics datasets. Includes tools for classification, visualization,
+    dimension reduction, and pathway enrichment.
 Authors@R: c(
     person("Di", "Xiao", role = c("aut", "cre"),
         email = "d.xiao@sydney.edu.au"),
